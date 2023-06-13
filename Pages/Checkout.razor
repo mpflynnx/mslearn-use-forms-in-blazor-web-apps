@@ -4,7 +4,7 @@
 @inject NavigationManager NavigationManager
 
 <div class="main">
-    <EditForm Model=Order.DeliveryAddress OnValidSubmit=PlaceOrder>
+    <EditForm Model=Order.DeliveryAddress OnValidSubmit=PlaceOrder OnInvalidSubmit=ShowError>
 
         <div class="checkout-cols">
             <div class="checkout-order-details">
@@ -34,9 +34,17 @@
     bool isSubmitting;
     bool isError = false;
 
+    protected void ShowError()
+    {
+        isError = true;
+    }
+
     async Task PlaceOrder()
     {
-        var response = await HttpClient.PostAsJsonAsync(NavigationManager.BaseUri + "orders", OrderState.Order);
+        isError = false;
+        isSubmitting = true;
+        var response = await HttpClient.PostAsJsonAsync(
+        $"{NavigationManager.BaseUri}orders", OrderState.Order);
         var newOrderId = await response.Content.ReadFromJsonAsync<int>();
         OrderState.ResetOrder();
         NavigationManager.NavigateTo($"myorders/{newOrderId}");
